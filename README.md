@@ -26,7 +26,7 @@ This bot automatically welcomes new members with a time-based greeting and intro
 To clone the repository to your local machine, run:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+git clone https://github.com/dneg-moscow/rajesh.git
 cd YOUR_REPO_NAME
 ````
 

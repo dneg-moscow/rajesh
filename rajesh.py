@@ -70,7 +70,7 @@ def get_intro_message(full_name):
         "How may I assist you today?"
     )
 
-# === Simple greeting message for /start ===
+# === Greeting for /start ===
 def get_greeting_only(full_name):
     greeting = get_time_greeting()
     return f"{greeting}, <b>{full_name}</b>! 👋\n\nHow may I assist you today?"
@@ -107,7 +107,8 @@ async def handle_buttons(update: Update, context: CallbackContext):
     query = update.callback_query
     await query.answer()
 
-    data = query.data
+    user_full_name = query.from_user.full_name or "User"
+
     responses = {
         "website": "🌐 Visit our official website:\nhttps://doublenegative.online/",
         "code": "💻 Explore our GitHub:\nhttps://github.com/dneg-moscow",
@@ -120,7 +121,15 @@ async def handle_buttons(update: Update, context: CallbackContext):
         )
     }
 
-    await query.message.reply_text(responses.get(data, "❓ Unknown option."), parse_mode="HTML")
+    response_text = responses.get(query.data, "❓ Unknown option.")
+
+    # Send a new message with the response text and the same inline buttons
+    await context.bot.send_message(
+        chat_id=query.message.chat.id,
+        text=f"{response_text}\n\n<b>{user_full_name}</b>, what would you like to do next?",
+        parse_mode="HTML",
+        reply_markup=main_menu()
+    )
 
 # === Register Handlers ===
 app.add_handler(ChatMemberHandler(welcome_new_member, ChatMemberHandler.CHAT_MEMBER))

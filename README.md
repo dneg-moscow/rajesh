@@ -1,6 +1,3 @@
-Here is the complete `README.md` file, ready for you to copy in one go:
-
-````markdown
 # 🤖 Rajesh – Double Negative Telegram Bot
 
 Rajesh is the official Telegram bot for the **Double Negative** team. Built with Python, it lives inside our team’s Telegram group, offering helpful interactions, updates, and automation to make internal collaboration smoother.
@@ -25,6 +22,8 @@ This bot automatically welcomes new members with a time-based greeting and intro
 ## 🔧 Setup Instructions
 
 ### 1. Clone the Repository
+
+To clone the repository to your local machine, run:
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
@@ -55,8 +54,6 @@ You can get this token from [@BotFather](https://t.me/botfather) on Telegram.
 python rajesh_bot.py
 ```
 
-
-
 ---
 
 ## ℹ️ About Me (The Bot)
@@ -81,3 +78,6 @@ Rajesh is written in **Python** and hosted on an **Android device** using a ligh
 ## 🧑‍💻 Author
 
 Maintained by the Double Negative Team. For issues or contributions, feel free to fork and create a pull request.
+
+```
+```

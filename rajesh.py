@@ -79,6 +79,10 @@ def get_greeting_only(full_name):
 async def welcome_new_member(update: Update, context: CallbackContext):
     result: ChatMemberUpdated = update.chat_member
     user = result.new_chat_member.user
+
+    # Debugging: Print chat member status to ensure it is being tracked correctly
+    logging.info(f"User {user.full_name} joined with status: {result.new_chat_member.status}")
+
     if result.new_chat_member.status == "member" and not has_been_welcomed(user.id):
         full_name = user.full_name or "there"
         intro_message = get_intro_message(full_name)

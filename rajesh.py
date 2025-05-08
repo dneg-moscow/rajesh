@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import logging
 import os
 from datetime import datetime
+import pytz
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatMemberUpdated
 from telegram.ext import (
     Application,
@@ -25,9 +26,17 @@ WELCOMED_USERS_FILE = "welcomed_users.txt"
 if not os.path.exists(WELCOMED_USERS_FILE):
     open(WELCOMED_USERS_FILE, "w").close()
 
-# === Time-Based Greeting ===
-def get_time_greeting():
-    hour = datetime.now().hour
+# === Get Time-Based Greeting Based on User's Timezone ===
+def get_time_greeting(user_timezone: str):
+    try:
+        # Convert server time to user's local timezone
+        tz = pytz.timezone(user_timezone)
+        user_time = datetime.now(tz)
+    except pytz.UnknownTimeZoneError:
+        # Default to UTC if the timezone is unknown
+        user_time = datetime.now(pytz.utc)
+
+    hour = user_time.hour
     if 5 <= hour < 12:
         return "🌅 Good Morning"
     elif 12 <= hour < 17:
@@ -61,7 +70,7 @@ def mark_as_welcomed(user_id: int):
 
 # === Intro message on first join ===
 def get_intro_message(full_name):
-    greeting = get_time_greeting()
+    greeting = get_time_greeting('UTC')  # Default to UTC if no timezone is available
     return (
         f"{greeting}, <b>{full_name}</b>! 👋\n\n"
         "🤖 I'm <b>Rajesh</b>, the official bot of <b>Double Negative</b>.\n"
@@ -71,18 +80,14 @@ def get_intro_message(full_name):
     )
 
 # === Greeting for /start ===
-def get_greeting_only(full_name):
-    greeting = get_time_greeting()
+def get_greeting_only(full_name, user_timezone):
+    greeting = get_time_greeting(user_timezone)
     return f"{greeting}, <b>{full_name}</b>! 👋\n\nHow may I assist you today?"
 
 # === Handle new member ===
 async def welcome_new_member(update: Update, context: CallbackContext):
     result: ChatMemberUpdated = update.chat_member
     user = result.new_chat_member.user
-
-    # Debugging: Print chat member status to ensure it is being tracked correctly
-    logging.info(f"User {user.full_name} joined with status: {result.new_chat_member.status}")
-
     if result.new_chat_member.status == "member" and not has_been_welcomed(user.id):
         full_name = user.full_name or "there"
         intro_message = get_intro_message(full_name)
@@ -98,7 +103,9 @@ async def welcome_new_member(update: Update, context: CallbackContext):
 async def start(update: Update, context: CallbackContext):
     user = update.effective_user
     full_name = user.full_name or "there"
-    message = get_greeting_only(full_name)
+    user_timezone = user.timezone if user.timezone else "UTC"
+
+    message = get_greeting_only(full_name, user_timezone)
 
     await update.message.reply_text(
         message,
@@ -127,9 +134,8 @@ async def handle_buttons(update: Update, context: CallbackContext):
 
     response_text = responses.get(query.data, "❓ Unknown option.")
 
-    # Send a new message with the response text and the same inline buttons
-    await context.bot.send_message(
-        chat_id=query.message.chat.id,
+    # Send new message with updated content and the same buttons
+    await query.edit_message_text(
         text=f"{response_text}\n\n<b>{user_full_name}</b>, what would you like to do next?",
         parse_mode="HTML",
         reply_markup=main_menu()
